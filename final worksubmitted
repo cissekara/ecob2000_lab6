@@ -1,0 +1,136 @@
+#HW7 BY CISSE, SERIGNE and KOUAKOU HERVE ALLAH ON NOVEMBER 04, 2021
+load("/cloud/project/Household_Pulse_data.RData")
+attach(Household_Pulse_data)
+
+detach()
+summary(Household_Pulse_data)
+length(Household_Pulse_data)
+Household_Pulse_data$vaxx <- (Household_Pulse_data$RECVDVACC == "yes got vaxx")
+summary(Household_Pulse_data$vaxx)
+# 60326 PARTICIPANTS in this datat set are responsding being vaccinated#
+is.na(Household_Pulse_data$vaxx) <- which(Household_Pulse_data$RECVDVACC == "NA") 
+summary(as.numeric(Household_Pulse_data$vaxx))
+#Roughly 88.37% per cent contribtuors are vaccinated#
+table(Household_Pulse_data$vaxx,Household_Pulse_data$EEDUC)
+#Here we can notice that 16727 have an Advanced Degree#
+vaxx_factor <- as.factor(Household_Pulse_data$vaxx)
+summary(vaxx_factor)
+levels(vaxx_factor)
+levels(vaxx_factor) <- c("no","yes") 
+glm(vaxx ~ EEDUC,family = binomial,  data = Household_Pulse_data)
+glm(vaxx ~ EEDUC,family = binomial,  data = Household_Pulse_data)  
+model_logit1 <- glm(vaxx ~ EEDUC,family = binomial, data = Household_Pulse_data)
+summary(model_logit1)
+exp(model_logit1$coefficients)
+plot(coef(model_logit1))
+##OUTPUT##
+#                Estimate Std. Error z value Pr(>|z|)    
+#  (Intercept)      0.92495    0.11020   8.393  < 2e-16 ***
+#  EEDUCsome hs    -0.03962    0.13189  -0.300  0.76390    
+#  EEDUCHS diploma  0.38389    0.11364   3.378  0.00073 ***
+#  EEDUCsome coll   0.68799    0.11245   6.118 9.46e-10 ***
+#  EEDUCassoc deg   0.78620    0.11483   6.846 7.57e-12 ***
+#  EEDUCbach deg    1.53254    0.11330  13.526  < 2e-16 ***
+#  EEDUCadv deg     2.09910    0.11590  18.111  < 2e-16 ***
+# In this case, significance is based on the value of the Estimate. We can see see that peoples who are vaccinated and do not have High-School degree are not really relevant to the study. ---
+#In here, High School degree Holders are not significant to our case study
+#We assumed that a good level of education matters in terms of decisionmaking#
+Household_Pulse_data$RECVDVACC <- as.numeric(Household_Pulse_data$RECVDVACC)
+summary(Household_Pulse_data$RECVDVACC)
+length(Household_Pulse_data$RECVDVACC)
+#This does not work at  all as it shows only the whole population#
+
+model_logit2 <- glm(Household_Pulse_data$RRACE ~ EEDUC,family = binomial, data = Household_Pulse_data)
+summary(model_logit2)
+exp(model_logit2$coefficients)
+plot(coef(model_logit2))
+#Call:
+# glm(formula = Household_Pulse_data$RRACE ~ EEDUC, family = binomial, 
+ #   data = Household_Pulse_data)
+
+# Deviance Residuals: 
+#  Min       1Q   Median       3Q      Max  
+# -0.8061  -0.6321  -0.6164  -0.5935   1.9096  
+
+# Coefficients:
+#  Estimate Std. Error z value Pr(>|z|)    
+# (Intercept)      -0.9575     0.1102  -8.691  < 2e-16 ***
+#  EEDUCsome hs     -0.1411     0.1336  -1.056    0.291    
+# EEDUCHS diploma  -0.4990     0.1139  -4.381 1.18e-05 ***
+#  EEDUCsome coll   -0.5515     0.1123  -4.913 8.96e-07 ***
+#  EEDUCassoc deg   -0.6069     0.1143  -5.308 1.11e-07 ***
+#  EEDUCbach deg    -0.6896     0.1118  -6.166 6.98e-10 ***
+#  EEDUCadv deg     -0.5713     0.1119  -5.105 3.31e-07 ***
+#  ---
+ # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+#(Dispersion parameter for binomial family taken to be 1)
+
+#Null deviance: 64351  on 69113  degrees of freedom
+#Residual deviance: 64250  on 69107  degrees of freedom
+#AIC: 64264
+
+#Number of Fisher Scoring iterations: 4
+
+#Once again, we can notice that getting a High School Degree is insignificant to our case studies. 
+pick_use1 <- (Household_Pulse_data$REGION == "Northeast") 
+dat_use1 <- subset(Household_Pulse_data, pick_use1)
+
+#So start from this baseline model and launch ahead,
+
+model_logit3 <- glm(vaxx ~ TBIRTH_YEAR + EEDUC + MS + RRACE + RHISPANIC + GENID_DESCRIBE,
+                    family = binomial, data = dat_use1)
+summary(model_logit3)
+exp(model_logit3$coefficients)
+plot(coef(model_logit3))
+#Note that they give data on age as “TBIRTH_YEAR” so if you put that into a regression, the coefficient sign swaps from what we usually think of, if we had AGE in the regression. Could define AGE <- 2021 - TBIRTH_YEAR. A regression, Y ~ AGE might have a positive coefficient on Age, that as person gets older Y tends to increase. It would then have a negative coefficient on TBIRTH_YEAR, that as person’s birth year goes up (therefore they are younger) then Y tends to decrease.
+#Now let's take a look a the population that are vaccinated in here and their interaction with living location, race race and Income
+
+#Logit model#
+
+Household_Pulse_data$vaxx <- (Household_Pulse_data$RECVDVACC == "yes got vaxx")
+is.na(Household_Pulse_data$vaxx) <- which(Household_Pulse_data$RECVDVACC == "NA")
+summary(Household_Pulse_data$vaxx)
+use_varb10 <- (Household_Pulse_data$REGION == "Northeast")
+dat_use10 <- subset(Household_Pulse_data,use_varb10)
+model_logit4 <- glm(vaxx ~ EEDUC + MS + RRACE  + GENID_DESCRIBE + Works_onsite*INCOME, family = binomial, data = dat_use10)
+summary(model_logit4)
+exp(model_logit4$coefficients)
+#(Intercept)    EEDUCsome hs EEDUCHS diploma  EEDUCsome coll 
+# 2.5217391       0.9611588       1.4679878       1.9897099 
+# EEDUCassoc deg   EEDUCbach deg    EEDUCadv deg 
+# 2.1950469       4.6298997       8.1588199 
+
+#Compared to the Intercept, High School Degree holders are still not significant
+plot(coef(model_logit4))
+#Now analyzing the variables, we can confirm that females with levels of education higher than High School degree are more likely to decide to be vaccinated. 
+#The Degree of High School compared to all other levels of education, and  in relation to low levels of income are significant to our hypothesis. We fail to reject and therefore we can definitely see that Edcuation, influences levels of purchasing power and therefere impacts on the decision making process to get vaxx#
+
+to_be_predicted2<- data.frame(EEDUC = "some coll", MS = "separated", RRACE = "Black", GENID_DESCRIBE = "female",
+                              Works_onsite = "worked onsite", INCOME= "HH income $50k - 74.9",    data = dat_use10)
+to_be_predicted2$yhat<-predict(model_logit4, to_be_predicted2, type="response")
+summary(to_be_predicted2$yhat)
+plot(to_be_predicted2$yhat)
+model_logit4 <- (to_be_predicted2 > 0.6)
+summary(model_logit4, model_logit1, type = "text")
+
+#We notice that Blacks holding a High School degree in the NorthEast fall outside our hypothesis and do not really impact the research.BLACK FEMAles with high Education and Decent Income have shown =, across the board, a firm willingness to get vaccinated. We can tell that the level of Education does matter when it comes to the decision making process
+
+#PROBIT FUNCTION#
+model__probit1 <- glm(vaxx ~ EEDUC + MS + RRACE  + GENID_DESCRIBE + Works_onsite*INCOME, family = binomial(link = "probit"), data = dat_use10)
+summary(model__probit1)
+exp(model__probit1$coefficients)
+plot(coef(model__probit1))
+#The Degree of High School in the NorthEast in relation to low levels of income are not significant to our hypothesis. We fail to reject and therefore we can definitely see that Edcuation, influences levels of purchasing power and therefere impacts on the decision making process to get vaxx#
+
+to_be_predicted2<- data.frame(EEDUC = "some coll", MS = "separated", RRACE = "Black", GENID_DESCRIBE = "female",
+                              Works_onsite = "worked onsite", INCOME= "HH income $50k - 74.9",    data = dat_use10)
+to_be_predicted2$yhat<-predict(model__probit1, to_be_predicted2, type="response")
+summary(to_be_predicted2$yhat)
+plot(to_be_predicted2$yhat)
+model_logit5 <- (to_be_predicted2 > 0.6)
+summary(model_logit5,model_probit1, type = "text")
+
+#We did not see much difference between the Logit function and Probit Function. Conclusion: the coefficients signs of Logit model and Probit model are the same. Both models demonstrate that “HighSchool” is insignificant.
+#Overall we have notice that Black females with Some HS credits is very interesting. The level of education in relatiosnhip with the decision to be vaccunated is not significant in both scenarios with logit and probit comparisons  
+
